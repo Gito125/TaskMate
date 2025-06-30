@@ -1,0 +1,33 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+
+:root {
+  --bg: #ffffff;
+  --text: #1a1a1a;
+  --accent: #0f3460;
+}
+
+.theme-jet {
+  --bg: #333333;
+  --text: #ffffff;
+  --accent: #98FF98;
+}
+
+.theme-light {
+  --bg: #f5f5f5;
+  --text: #333333;
+  --accent: #FF6B6B;
+}
+
+.theme-dark {
+  --bg: #1A1A2E;
+  --text: #E8E8E8;
+  --accent: #0F3460;
+}
+
+.theme-sienna {
+  --bg: #FFF5E1;
+  --text: #1A1A1A;
+  --accent: #E2725B;
+}
