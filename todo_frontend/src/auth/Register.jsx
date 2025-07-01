@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from '../api/axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -28,10 +28,10 @@ const Register = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
+    <div className="flex items-center justify-center min-h-screen bg-[var(--bg)] px-4">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-xl shadow-md w-full max-w-md space-y-4"
+        className="bg-[var(--accent)] p-6 rounded-xl shadow-md w-full max-w-md space-y-4"
       >
         <h2 className="text-2xl font-bold text-center">Register</h2>
 
@@ -64,10 +64,18 @@ const Register = () => {
 
         <button
           type="submit"
-          className="w-full py-2 text-white bg-blue-500 hover:bg-blue-600 rounded transition"
+          className="w-full py-2 bg-[var(--bg)] text-[var(--accent)] cursor-pointer hover:bg-[var(--text)] rounded transition"
         >
           Create Account
         </button>
+
+        <div className="flex text-sm text-right mt-4">
+          <p>Have an account.</p>
+          <Link to="/login" className="ml-1 text-[var(--bg)] hover:underline">
+            Login here
+          </Link>
+        </div>
+
       </form>
     </div>
   );

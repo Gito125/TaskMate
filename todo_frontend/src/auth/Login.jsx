@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from '../api/axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -62,10 +62,17 @@ const Login = () => {
 
         <button
           type="submit"
-          className="w-full py-2 text-[var(--text)] bg-blue-500 hover:bg-blue-600 rounded transition"
+          className="w-full py-2 bg-[var(--bg)] text-[var(--accent)] cursor-pointer hover:bg-[var(--text)] rounded transition"
         >
           Login
         </button>
+
+        <div className="flex text-sm text-right mt-4">
+          <p>Don't have an account.</p>
+          <Link to="/register" className="ml-1 text-[var(--bg)] hover:underline">
+            Register here
+          </Link>
+        </div>
       </form>
     </div>
   );

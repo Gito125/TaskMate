@@ -5,7 +5,8 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token")
     navigate("/login");
   };
 
@@ -16,6 +17,10 @@ const Layout = ({ children }) => {
         <h1 className="text-xl font-bold tracking-wide">📝 PrimeTasks</h1>
         <div className="flex gap-3 items-center">
           <ThemeSwitcher />
+
+          {/* User Name and Icon */}
+          
+
           <button
             onClick={handleLogout}
             className="text-sm px-4 py-2 rounded bg-[var(--bg)] text-[var(--accent)] border border-[var(--accent)] hover:bg-opacity-90 transition"

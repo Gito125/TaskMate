@@ -114,15 +114,15 @@ const Dashboard = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            className="flex-1 px-4 py-2 border rounded bg-bg text-text"
+            className="flex-1 px-4 py-2 border rounded bg-bg text-[var(--accent)] text-text focus:outline-none focus:ring-2 focus:ring-accent transition shadow-lg"
           />
           <input
             type="date"
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
-            className="px-4 py-2 border rounded text-[var(--accent)] text-text"
+            className="px-4 py-2 border rounded text-[var(--accent)] text-text  shadow-lg"
           />
-          <button type="submit" className="bg-[var(--accent)] text-bg px-4 py-2 rounded hover:opacity-90 transition">
+          <button type="submit" className="bg-[var(--accent)] text-bg px-4 py-2 rounded hover:opacity-90 transition cursor-pointer hover:shadow-lg">
             Add Task
           </button>
         </form>
@@ -155,7 +155,7 @@ const Dashboard = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="flex justify-between items-start bg-white/10 backdrop-blur-md border border-text/20 rounded-lg p-4 shadow-sm hover:shadow-lg transition-shadow"
+                  className="flex justify-between items-start bg-white/10 backdrop-blur-md border border-text/20 rounded-lg p-4 shadow-sm hover:shadow-xl transition-shadow"
                 >
                   <div className="flex-1">
                     <div className="flex items-start gap-2">
