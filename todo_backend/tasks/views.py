@@ -6,6 +6,18 @@ from .serializers import TaskSerializer
 from django.contrib.auth.models import User
 from rest_framework.serializers import ModelSerializer
 from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def me_view(request):
+    user = request.user
+    return Response({
+        "id": user.id,
+        "username": user.username
+    })
 
 # --- Task CRUD ---
 class TaskViewSet(viewsets.ModelViewSet):
@@ -43,3 +55,4 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # This file contains the views for handling task CRUD operations and user registration.
 # The TaskViewSet allows authenticated users to manage their tasks, while the RegisterView
+

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from '../api/axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { setTheme } from '../utils/setTheme';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -26,6 +27,11 @@ const Register = () => {
       setError('Username already taken or password too weak.');
     }
   };
+
+    useEffect(() => {
+      setTheme(); // Set initial theme
+    }), [];
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[var(--bg)] px-4">
@@ -64,14 +70,14 @@ const Register = () => {
 
         <button
           type="submit"
-          className="w-full py-2 bg-[var(--bg)] text-[var(--accent)] cursor-pointer hover:bg-[var(--text)] rounded transition"
+          className="w-full py-2 bg-[var(--bg)] text-[var(--text)] hover:text-[var(--bg)] cursor-pointer hover:bg-[var(--text)] rounded transition"
         >
           Create Account
         </button>
 
         <div className="flex text-sm text-right mt-4">
           <p>Have an account.</p>
-          <Link to="/login" className="ml-1 text-[var(--bg)] hover:underline">
+          <Link to="/login" className="ml-1 text-[var(--text)] hover:underline">
             Login here
           </Link>
         </div>
