@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "../api/axios";
 import Layout from "../components/Layout";
 import { toast } from "react-hot-toast";
 import ThemeSwitcher from "../components/ThemeSwitcher";
+
+const filters = ["all", "completed", "pending"];
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
@@ -14,26 +16,27 @@ const Dashboard = () => {
   const [editDeadline, setEditDeadline] = useState("");
   const [filter, setFilter] = useState(() => localStorage.getItem("filter") || "all");
 
+  // Save filter in localStorage
   useEffect(() => {
     localStorage.setItem("filter", filter);
   }, [filter]);
 
-  // 🔁 Load tasks
-  const fetchTasks = async () => {
+  // Load tasks
+  const fetchTasks = useCallback(async () => {
     try {
       const res = await axios.get("tasks/");
       setTasks(res.data);
     } catch (err) {
-      console.error("Failed to fetch tasks:", err);
+      console.error("Fetch error:", err);
       toast.error("Could not load tasks");
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [fetchTasks]);
 
-  // ➕ Create Task
+  // Add task
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
@@ -43,31 +46,30 @@ const Dashboard = () => {
       fetchTasks();
       toast.success("Task added!");
     } catch (err) {
-      console.error("Error creating task:", err);
-      toast.error("Something went wrong");
+      console.error(err);
+      toast.error("Could not create task");
     }
   };
 
-  // ❌ Delete Task
+  // Delete task
   const handleDelete = async (id) => {
     try {
       await axios.delete(`tasks/${id}/`);
-      setTasks((prev) => prev.filter((task) => task.id !== id));
-      toast.success("Task deleted!");
+      setTasks(prev => prev.filter(task => task.id !== id));
+      toast.success("Task deleted");
     } catch (err) {
-      console.error("Error deleting task:", err);
+      console.error(err);
       toast.error("Failed to delete task");
     }
   };
 
-  // ✏️ Edit Task
+  // Edit task
   const startEditing = (task) => {
     setEditingTaskId(task.id);
     setEditTitle(task.title);
     setEditDeadline(task.deadline || "");
   };
 
-  // ✅ Update Task
   const handleUpdate = async (id) => {
     try {
       await axios.put(`tasks/${id}/`, {
@@ -78,36 +80,33 @@ const Dashboard = () => {
       fetchTasks();
       toast.success("Task updated!");
     } catch (err) {
-      console.error("Error updating task:", err);
-      toast.error("Failed to update task");
+      console.error(err);
+      toast.error("Update failed");
     }
   };
 
-  // ✅ Toggle Completion
   const toggleComplete = async (id, completed) => {
     try {
       await axios.patch(`tasks/${id}/`, { completed });
       fetchTasks();
       toast.success(`Marked as ${completed ? "completed ✅" : "pending 🔄"}`);
     } catch (err) {
-      console.error("Error toggling task:", err);
-      toast.error("Failed to toggle task");
+      toast.error("Toggle failed");
+      console.error(`The error is ${err}`);
     }
   };
 
-  // 🗂️ Filtered Task List
-  const filteredTasks = tasks.filter((task) => {
-    if (filter === "completed") return task.completed;
-    if (filter === "pending") return !task.completed;
-    return true;
-  });
+  const filteredTasks = tasks.filter(task =>
+    filter === "completed" ? task.completed :
+    filter === "pending" ? !task.completed :
+    true
+  );
 
   return (
     <Layout>
       <div className="p-6 max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-center text-accent">🧠 Task Dashboard</h1>
 
-        {/* Task Form */}
         <form onSubmit={handleCreate} className="flex flex-col sm:flex-row gap-2 mb-6">
           <input
             type="text"
@@ -121,31 +120,31 @@ const Dashboard = () => {
             type="date"
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
-            className="px-4 py-2 border rounded bg-bg text-text"
+            className="px-4 py-2 border rounded text-[var(--accent)] text-text"
           />
-          <button type="submit" className="bg-accent text-bg px-4 py-2 rounded hover:opacity-90 transition">
+          <button type="submit" className="bg-[var(--accent)] text-bg px-4 py-2 rounded hover:opacity-90 transition">
             Add Task
           </button>
         </form>
 
-        {/* Filter Buttons */}
-        <div className="flex justify-center gap-4 mb-4">
-          {["all", "completed", "pending"].map((f) => (
+        <div className="flex justify-center gap-3 mb-6">
+          {filters.map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1 rounded border ${
-                filter === f ? "bg-accent text-bg" : "bg-transparent border-text text-text"
-              } hover:opacity-80 transition`}
+              className={`px-3 py-1 rounded border text-sm capitalize transition ${
+                filter === f
+                  ? "bg-accent text-bg border-accent"
+                  : "bg-transparent border-text text-text hover:opacity-70"
+              }`}
             >
-              {f.charAt(0).toUpperCase() + f.slice(1)}
+              {f}
             </button>
           ))}
         </div>
 
-        {/* Task List */}
         {filteredTasks.length === 0 ? (
-          <p className="text-center text-sm text-text/60">No tasks under "{filter}" filter 🔍</p>
+          <p className="text-center text-sm text-text/60">No tasks under “{filter}” filter 🔍</p>
         ) : (
           <AnimatePresence>
             <motion.ul className="space-y-3">
@@ -186,25 +185,33 @@ const Dashboard = () => {
                             {task.title}
                           </h3>
                           {task.deadline && (
-                            <p className="text-sm text-text/50">📅 Deadline: {task.deadline}</p>
+                            <p className="text-sm text-text/50">📅 {task.deadline}</p>
                           )}
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Actions */}
                   <div className="flex gap-2 mt-2 sm:mt-0">
                     {editingTaskId === task.id ? (
-                      <button onClick={() => handleUpdate(task.id)} className="text-green-600 hover:underline">
+                      <button
+                        onClick={() => handleUpdate(task.id)}
+                        className="text-green-600 hover:underline"
+                      >
                         Save
                       </button>
                     ) : (
-                      <button onClick={() => startEditing(task)} className="text-blue-600 hover:underline">
+                      <button
+                        onClick={() => startEditing(task)}
+                        className="text-blue-600 hover:underline"
+                      >
                         Edit
                       </button>
                     )}
-                    <button onClick={() => handleDelete(task.id)} className="text-red-600 hover:underline">
+                    <button
+                      onClick={() => handleDelete(task.id)}
+                      className="text-red-600 hover:underline"
+                    >
                       Delete
                     </button>
                   </div>
@@ -219,4 +226,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-// This code is a React component for a task dashboard that allows users to create, edit, delete, and filter tasks.

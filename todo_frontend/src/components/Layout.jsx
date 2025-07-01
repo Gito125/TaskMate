@@ -10,24 +10,25 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text transition-colors">
-      <header className="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-accent to-bg shadow-md">
-        <h1 className="text-xl font-bold">📝 PrimeTasks</h1>
-        <div className="flex gap-4 items-center">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors duration-300">
+      {/* 🔝 Header */}
+      <header className="flex justify-between items-center px-6 py-4 bg-[var(--accent)] text-[var(--bg)] shadow-md">
+        <h1 className="text-xl font-bold tracking-wide">📝 PrimeTasks</h1>
+        <div className="flex gap-3 items-center">
           <ThemeSwitcher />
           <button
             onClick={handleLogout}
-            className="text-sm px-3 py-1 rounded bg-text text-bg hover:opacity-80"
+            className="text-sm px-4 py-2 rounded bg-[var(--bg)] text-[var(--accent)] border border-[var(--accent)] hover:bg-opacity-90 transition"
           >
             Logout
           </button>
         </div>
       </header>
+
+      {/* 📦 Main Content */}
       <main className="p-6">{children}</main>
     </div>
   );
 };
 
 export default Layout;
-// This code defines a Layout component that serves as a wrapper for the main content of the application.
-// It includes a header with a title, a theme switcher, and a logout button.

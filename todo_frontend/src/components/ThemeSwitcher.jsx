@@ -15,7 +15,7 @@ const ThemeSwitcher = () => {
   }, [theme]);
 
   return (
-    <div className="flex gap-2 justify-center mb-6 flex-wrap">
+    <div className="flex gap-2 justify-center flex-wrap">
       {themes.map((t) => (
         <button
           key={t}
