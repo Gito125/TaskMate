@@ -112,6 +112,7 @@ const Dashboard = () => {
 
   // Delete task
   const handleDelete = async (id) => {
+    console.log('Deleting...')
     try {
       await axios.delete(`tasks/${id}/`);
       setTasks(prev => prev.filter(task => task.id !== id));
@@ -124,6 +125,7 @@ const Dashboard = () => {
 
   // Edit task
   const startEditing = (task) => {
+    console.log('Editing task:', task);
     setEditingTaskId(task.id);
     setEditTitle(task.title);
     setEditDeadline(task.deadline || "");
