@@ -86,7 +86,7 @@ const Layout = ({ children }) => {
       )}
 
       {/* 📦 Main Content */}
-      <main className="p-2">{children}</main>
+      <main className="p-1 sm:p-2">{children}</main>
     </div>
   );
 };

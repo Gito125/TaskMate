@@ -9,79 +9,51 @@ import {
   KeyboardSensor,
   PointerSensor,
   useSensor,
-  useSensors
-} from '@dnd-kit/core';
+  useSensors,
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
-  useSortable,
-  verticalListSortingStrategy
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import SortableTask from "../components/SortableTask";
+import FilterButtons from "../components/FilterButtons";
 
-// This wrapper makes each task sortable
-const SortableTask = ({ task, children }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition
-  } = useSortable({ id: task.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition
-  };
-
-  return (
-    <motion.li
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.2 }}
-      className="flex justify-between items-start bg-white/10 backdrop-blur-md border border-text/20 rounded-lg p-1 shadow-sm hover:shadow-xl transition-shadow w-full mb-3"
-    >
-      {children}  
-    </motion.li>
-  );
+const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
+const TAG_ICONS = {
+  work: "💼",
+  study: "📚",
+  personal: "👤",
+  urgent: "🚨",
 };
 
-const filters = ["all", "completed", "pending"];
-
-const Dashboard = () => {
+export default function Dashboard() {
+  // State
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
   const [deadline, setDeadline] = useState("");
-  const [editingTaskId, setEditingTaskId] = useState(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editDeadline, setEditDeadline] = useState("");
-  const [filter, setFilter] = useState(() => localStorage.getItem("filter") || "all");
   const [priority, setPriority] = useState("medium");
   const [tag, setTag] = useState("personal");
+  const [editingId, setEditingId] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDeadline, setEditDeadline] = useState("");
+  const [editPriority, setEditPriority] = useState("medium");
+  const [editTag, setEditTag] = useState("personal");
+  const [filter, setFilter] = useState(
+    () => localStorage.getItem("filter") || "all"
+  );
 
-  useEffect(() => {
-    // Login success message
-    toast.success('Logged in successfuly...')
-  }, [])
-
-  // Save filter in localStorage
+  // Persist filter
   useEffect(() => {
     localStorage.setItem("filter", filter);
   }, [filter]);
 
-  // Load tasks
+  // Fetch tasks
   const fetchTasks = useCallback(async () => {
     try {
-      const res = await axios.get("tasks/");
-      setTasks(res.data);
-    } catch (err) {
-      console.error("Fetch error:", err);
+      const { data } = await axios.get("tasks/");
+      setTasks(data);
+    } catch {
       toast.error("Could not load tasks");
     }
   }, []);
@@ -90,242 +62,262 @@ const Dashboard = () => {
     fetchTasks();
   }, [fetchTasks]);
 
-  // Add task
+  // Create
   const handleCreate = async (e) => {
     e.preventDefault();
-    try {
-      await axios.post("tasks/", {
-      title,
-      deadline,
-      priority,
-      tag,
-    });
-      setTitle("");
-      setDeadline("");
-      fetchTasks();
-      toast.success("Task added!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Could not create task");
-    }
+    await axios.post("tasks/", { title, deadline, priority, tag });
+    setTitle("");
+    setDeadline("");
+    setPriority("medium");
+    setTag("personal");
+    fetchTasks();
+    toast.success("Task added!");
   };
 
-  // Delete task
+  // Delete
   const handleDelete = async (id) => {
-    console.log('Deleting...')
-    try {
-      await axios.delete(`tasks/${id}/`);
-      setTasks(prev => prev.filter(task => task.id !== id));
-      toast.success("Task deleted");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to delete task");
-    }
+    await axios.delete(`tasks/${id}/`);
+    setTasks((t) => t.filter((x) => x.id !== id));
+    toast.success("Task deleted");
   };
 
-  // Edit task
-  const startEditing = (task) => {
-    console.log('Editing task:', task);
-    setEditingTaskId(task.id);
-    setEditTitle(task.title);
-    setEditDeadline(task.deadline || "");
+  // Start edit
+  const startEditing = (t) => {
+    setEditingId(t.id);
+    setEditTitle(t.title);
+    setEditDeadline(t.deadline || "");
+    setEditPriority(t.priority);
+    setEditTag(t.tag);
   };
 
+  // Update
   const handleUpdate = async (id) => {
-    try {
-      await axios.put(`tasks/${id}/`, {
-        title: editTitle,
-        deadline: editDeadline,
-        priority,
-        tag,
-      });
-      setEditingTaskId(null);
-      fetchTasks();
-      toast.success("Task updated!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Update failed");
-    }
+    await axios.put(`tasks/${id}/`, {
+      title: editTitle,
+      deadline: editDeadline,
+      priority: editPriority,
+      tag: editTag,
+    });
+    setEditingId(null);
+    fetchTasks();
+    toast.success("Task updated!");
   };
 
-  const toggleComplete = async (id, completed) => {
-    try {
-      await axios.patch(`tasks/${id}/`, { completed });
-      fetchTasks();
-      toast.success(`Marked as ${completed ? "completed ✅" : "pending 🔄"}`);
-    } catch (err) {
-      toast.error("Toggle failed");
-      console.error(`The error is ${err}`);
-    }
+  // Toggle complete
+  const toggleComplete = async (id, val) => {
+    await axios.patch(`tasks/${id}/`, { completed: val });
+    fetchTasks();
+    toast.success(val ? "Completed ✅" : "Pending 🔄");
   };
 
-  const filteredTasks = tasks.filter(task =>
-    filter === "completed" ? task.completed :
-    filter === "pending" ? !task.completed :
-    true
-  );
+  // Filter & sort
+  const filtered = tasks
+    .filter((t) =>
+      filter === "completed" ? t.completed : filter === "pending" ? !t.completed : true
+    )
+    .sort((a, b) => {
+      const aTime = a.deadline ? new Date(a.deadline).getTime() : Infinity;
+      const bTime = b.deadline ? new Date(b.deadline).getTime() : Infinity;
 
+      if (aTime !== bTime) return aTime - bTime;
+      return PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
+    });
 
-  // DnD setup
+  // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor)
   );
 
-  const handleDragEnd = (event) => {
-  const { active, over } = event;
-  if (!over || active.id === over.id) return;
-
-    const oldIndex = tasks.findIndex(task => task.id === active.id);
-    const newIndex = tasks.findIndex(task => task.id === over.id);
-    const reordered = arrayMove(tasks, oldIndex, newIndex);
-    setTasks(reordered);
-
-    // Optional: send new order to backend if you're storing positions
+  const handleDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return;
+    const oldIdx = tasks.findIndex((t) => t.id === active.id);
+    const newIdx = tasks.findIndex((t) => t.id === over.id);
+    setTasks((prev) => arrayMove(prev, oldIdx, newIdx));
   };
-
 
   return (
     <Layout>
-      <div className="p-1 max-w-3xl mx-auto">
-        <h1 className="text-xl sm:text-3xl font-bold mb-4 text-center text-accent">🧠 Task Dashboard</h1>
+      <div className="p-2 py-0 sm:p-4 max-w-3xl mx-auto">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center mb-4 text-accent">
+          🧠 Task Dashboard
+        </h1>
 
-        <form onSubmit={handleCreate} className="flex flex-col sm:flex-row gap-2 mb-6">
+        {/* Form */}
+        <form
+          onSubmit={handleCreate}
+          className="grid grid-cols-4 sm:grid-cols-[2fr,1fr,auto,auto,auto] gap-2 mb-6"
+        >
           <input
             type="text"
             placeholder="Task Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            className="flex-1 px-4 py-2 border rounded bg-bg text-[var(--accent)] text-text focus:outline-none focus:ring-2 focus:ring-accent transition shadow-lg"
-          />
-          <input
-            type="date"
-            value={deadline}
-            onChange={(e) => setDeadline(e.target.value)}
-            className="flex-1 px-4 py-2 border rounded bg-bg text-[var(--accent)] text-text focus:outline-none focus:ring-2 focus:ring-accent transition shadow-lg"
+            className="col-span-full px-3 py-2 border rounded bg-bg text-[var(--accent)]"
           />
 
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-            className="flex-1 px-4 py-2 border rounded bg-bg text-[var(--accent)] text-text focus:outline-none focus:ring-2 focus:ring-accent transition shadow-lg"
-          >
-            <option value="low">Low 🔅</option>
-            <option value="medium">Medium ⚖️</option>
-            <option value="high">High 🔥</option>
-          </select>
+          {/* Date select: icon on mobile */}
+          <div className="relative">
+            <span className="absolute inset-y-0 left-2 flex items-center pointer-events-none sm:hidden">
+              📅
+            </span>
+            <input
+              type="date"
+              value={deadline}
+              onChange={(e) => setDeadline(e.target.value)}
+              className="w-full px-3 py-2 pl-8 sm:pl-3 border rounded bg-bg text-[var(--accent)]"
+            />
+          </div>
 
-          <select
-            value={tag}
-            onChange={(e) => setTag(e.target.value)}
-            className="flex-1 px-4 py-2 border rounded bg-bg text-[var(--accent)] text-text focus:outline-none focus:ring-2 focus:ring-accent transition shadow-lg"
-          >
-            <option value="work">Work 💼</option>
-            <option value="study">Study 📚</option>
-            <option value="personal">Personal 👤</option>
-            <option value="urgent">Urgent 🚨</option>
-          </select>
+          {/* Priority */}
+          <div className="relative">
+            <span className="absolute inset-y-0 left-2 flex items-center pointer-events-none sm:hidden">
+              {priority === "low"
+                ? "🟢"
+                : priority === "medium"
+                ? "🟡"
+                : "🔴"}
+            </span>
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              className="w-full px-3 py-2 pl-8 sm:pl-3 border rounded bg-bg text-[var(--accent)]"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
 
+          {/* Tag */}
+          <div className="relative">
+            <span className="absolute inset-y-0 left-2 flex items-center pointer-events-none  sm:hidden">
+              {TAG_ICONS[tag]}
+            </span>
+            <select
+              value={tag}
+              onChange={(e) => setTag(e.target.value)}
+              className="w-full px-3 py-2 pl-8 sm:pl-3 border rounded bg-bg text-[var(--accent)]"
+            >
+              {Object.entries(TAG_ICONS).map(([key]) => (
+                <option key={key} value={key}>
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <button type="submit" className="bg-[var(--accent)] text-[var(--text)] cursor-pointer hover:text-[var(--bg)] hover:bg-[var(--text)] px-4 py-2 rounded hover:opacity-90 transition hover:shadow-lg">
-            Add Task
+          <button className="px-4 py-2 bg-[var(--accent)] text-[var(--text)] rounded hover:opacity-90 transition">
+            Add
           </button>
         </form>
 
-        <div className="flex justify-center gap-3 mb-6">
-          {filters.map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-3 py-1 rounded border text-sm capitalize transition ${
-                filter === f
-                  ? "bg-accent text-bg border-accent"
-                  : "bg-transparent border-text text-text hover:opacity-70"
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
+        {/* Filters */}
+        <FilterButtons filter={filter} setFilter={setFilter} />
 
-        {filteredTasks.length === 0 ? (
-          <p className="text-center text-sm text-text/60">No tasks under “{filter}” filter 🔍</p>
+        {/* Task List */}
+        {filtered.length === 0 ? (
+          <p className="text-center text-[var(--accent)]/60">No tasks under “{filter}”</p>
         ) : (
           <AnimatePresence>
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}  // We'll define this below
+              onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={filteredTasks.map((task) => task.id)}
+                items={filtered.map((t) => t.id)}
                 strategy={verticalListSortingStrategy}
               >
-                {filteredTasks.map((task) => (
+                {filtered.map((task) => (
                   <SortableTask key={task.id} task={task}>
-                    <motion.span
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                      className="flex justify-between items-start rounded-lg p-4 shadow-sm hover:shadow-xl transition-shadow w-full"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-start gap-2">
+                    <div className="p-1 py-2 flex flex-col sm:flex-row sm:items-center justify-between w-full">
+                      {/* Left: checkbox + title */}
+                      <div className="flex items-center gap-2 flex-1">
+                        <input
+                          type="checkbox"
+                          checked={task.completed}
+                          onChange={() => toggleComplete(task.id, !task.completed)}
+                          className="accent-accent"
+                        />
+                        {editingId === task.id ? (
                           <input
-                            autoComplete="off"
-                            type="checkbox"
-                            checked={task.completed}
-                            onChange={() => toggleComplete(task.id, !task.completed)}
-                            className="accent-accent mt-1"
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                            className="flex-1 px-2 py-1 border rounded bg-bg text-[var(--accent)]"
                           />
-                          {editingTaskId === task.id ? (
-                            <div className="flex flex-col sm:flex-row gap-2 w-full">
-                              <input
-                                autoComplete=""
-                                value={editTitle}
-                                onChange={(e) => setEditTitle(e.target.value)}
-                                className="px-2 py-1 border rounded w-full bg-bg text-text"
-                              />
-                              <input
-                                type="date"
-                                value={editDeadline}
-                                onChange={(e) => setEditDeadline(e.target.value)}
-                                className="px-2 py-1 border rounded bg-bg text-text"
-                              />
-                            </div>
-                          ) : (
-                            <div className="mt-1 flex gap-2 text-xs sm:text-sm">
-                              <h3 className={`font-medium ${task.completed ? "line-through text-gray-500" : "text-text"}`}>
-                                {task.title}
-                              </h3>
-                              {task.deadline && (
-                                <p className="text-sm text-text/50">📅 {task.deadline}</p>
-                              )}
-                              <span className={`px-2 py-1 rounded-full font-semibold ${
-                                task.priority === "high" ? "bg-rose-500 text-white" :
-                                task.priority === "medium" ? "bg-amber-400 text-black" :
-                                "bg-teal-500 text-white"
-                              }`}>
-                                {task.priority.toUpperCase()}
-                              </span>
-
-                              <span className={`px-2 py-1 rounded-full font-medium ${
-                                task.tag === "work" ? "bg-indigo-600 text-white" :
-                                task.tag === "study" ? "bg-violet-500 text-white" :
-                                task.tag === "urgent" ? "bg-crimson-600 text-white" :
-                                "bg-slate-600 text-white"
-                              }`}>
-                                {task.tag}
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                        ) : (
+                          <h3
+                            className={`flex-1 font-medium ${
+                              task.completed ? "line-through text-gray-500" : "text-[var(--text)]"
+                            }`}
+                          >
+                            {task.title}
+                          </h3>
+                        )}
                       </div>
 
-                      <div className="flex gap-2 mt-2 sm:mt-0">
-                        {editingTaskId === task.id ? (
+                      {/* Middle: deadline, priority, tag */}
+                      <div className="flex items-center gap-3 mt-2 sm:mt-0">
+                        {editingId === task.id ? (
+                          <>
+                            <input
+                              type="date"
+                              value={editDeadline}
+                              onChange={(e) => setEditDeadline(e.target.value)}
+                              className="px-2 py-1 border rounded bg-bg text-[var(--accent)]"
+                            />
+
+                            <select
+                              value={editPriority}
+                              onChange={(e) => setEditPriority(e.target.value)}
+                              className="px-2 py-1 border rounded bg-bg text-[var(--accent)]"
+                            >
+                              <option value="low">Low</option>
+                              <option value="medium">Medium</option>
+                              <option value="high">High</option>
+                            </select>
+
+                            <select
+                              value={editTag}
+                              onChange={(e) => setEditTag(e.target.value)}
+                              className="px-2 py-1 border rounded bg-bg text-[var(--accent)]"
+                            >
+                              {Object.entries(TAG_ICONS).map(([k, ic]) => (
+                                <option key={k} value={k}>
+                                  {ic} {k.charAt(0).toUpperCase() + k.slice(1)}
+                                </option>
+                              ))}
+                            </select>
+                          </>
+                        ) : (
+                          <>
+                            {task.deadline && <span className="text-sm">📅 {task.deadline}</span>}
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                task.priority === "high"
+                                  ? "bg-rose-500 text-white"
+                                  : task.priority === "medium"
+                                  ? "bg-amber-400 text-black"
+                                  : "bg-teal-500 text-white"
+                              }`}
+                            >
+                              {task.priority.charAt(0).toUpperCase()}
+                            </span>
+                            <span
+                              className="px-2 py-1 rounded-full text-xs font-medium bg-slate-600 text-white"
+                              title={task.tag}
+                            >
+                              {TAG_ICONS[task.tag]}
+                            </span>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                        {editingId === task.id ? (
                           <button
                             onClick={() => handleUpdate(task.id)}
                             className="text-green-600 hover:underline"
@@ -335,7 +327,7 @@ const Dashboard = () => {
                         ) : (
                           <button
                             onClick={() => startEditing(task)}
-                            className="text-blue-600 hover:underline"
+                            className="text-blue-600 hover:underline mx-1"
                           >
                             Edit
                           </button>
@@ -347,7 +339,7 @@ const Dashboard = () => {
                           Delete
                         </button>
                       </div>
-                    </motion.span>
+                    </div>
                   </SortableTask>
                 ))}
               </SortableContext>
@@ -357,6 +349,4 @@ const Dashboard = () => {
       </div>
     </Layout>
   );
-};
-
-export default Dashboard;
+}
