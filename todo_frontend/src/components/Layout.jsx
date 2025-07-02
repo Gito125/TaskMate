@@ -34,7 +34,7 @@ const Layout = ({ children }) => {
       {/* 🔝 Header */}
       <header className="flex flex-col sm:flex-row justify-between items-center px-4 py-4 gap-4 sm:gap-0 bg-[var(--accent)] text-[var(--bg)] shadow-md">
         <div className="flex items-center justify-center w-full sm:w-auto">
-          <h1 className="text-xl font-bold tracking-wide text-[var(--text)]">📝 PrimeTasks</h1>
+          <h1 className="text-xl font-bold tracking-wide text-[var(--text)]">📝 TaskMate</h1>
 
           {/* Hamburger for theme dropdown */}
           <div className="sm:hidden relative">
