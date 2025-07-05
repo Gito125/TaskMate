@@ -56,8 +56,8 @@ python manage.py migrate
 python manage.py runserver
 
 cd ../todo_frontend
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 ### Folder Structure
