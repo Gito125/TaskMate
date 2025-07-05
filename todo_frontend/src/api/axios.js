@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://127.0.0.1:8000/api/';
+// const BASE_URL = 'http://127.0.0.1:8000/api/';
+const BASE_URL = 'https://taskmate-production-8ca4.up.railway.app/api/';
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
