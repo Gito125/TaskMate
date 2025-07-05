@@ -15,23 +15,34 @@ from dotenv import load_dotenv
 from pathlib import Path
 from decouple import config  # if using python-decouple
 import dj_database_url
-
-# Load environment variables from .env file
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv("DATABASE_URL"),
-        conn_max_age=600,  # Optional: improves performance
-    )
-}
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Read .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+# Initialize env
+env = environ.Env(
+    DEBUG=(bool, False)
+)
+
+# settings.py
+DEBUG = env('DEBUG')
+SECRET_KEY = env('SECRET_KEY')
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+
+# DATABASE
+DATABASES = {
+    'default': env.db(),  # automatically uses DATABASE_URL
+}
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-j#fa9t7f6$g8vf0(=f=_@@zohs$h)(0e41c14h_c!%q2dfyup&'
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False

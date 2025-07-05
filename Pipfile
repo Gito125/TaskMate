@@ -14,6 +14,8 @@ gunicorn = "*"
 dj-database-url = "*"
 whitenoise = "*"
 python-decouple = "*"
+django-environ = "*"
+environ = "*"
 
 [dev-packages]
 
