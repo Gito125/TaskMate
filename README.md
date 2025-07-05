@@ -6,7 +6,7 @@ A sleek, responsive task manager built with **React (Vite + Tailwind CSS)** and 
 
 ## 📸 Preview
 
-![TaskMate Screenshot](https://your-domain.com/preview.png)
+![TaskMate Screenshot](https://task-mate-kappa-rosy.vercel.app/og-preview.png)
 
 ---
 
@@ -33,7 +33,7 @@ A sleek, responsive task manager built with **React (Vite + Tailwind CSS)** and 
 
 ## 🚀 Live Demo
 
-🔗 Coming soon: [https://taskmate.yourdomain.com](https://taskmate.yourdomain.com)
+🔗 [https://task-mate-kappa-rosy.vercel.app/]
 
 ---
 
@@ -46,7 +46,7 @@ A sleek, responsive task manager built with **React (Vite + Tailwind CSS)** and 
 ### Clone the repo
 
 ```bash
-git clone https://github.com/yourusername/taskmate.git
+git clone https://github.com/Gito125/TaskMate.git
 cd taskmate
 
 cd todo_backend
