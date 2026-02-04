@@ -1,27 +1,27 @@
-# 🧠 TaskMate – Smart Task Management Dashboard
+# TaskMate – Smart Task Management Dashboard
 
 A sleek, responsive task manager built with **React (Vite + Tailwind CSS)** and a **Django REST backend**. Drag-and-drop sorting, priority tagging, filtering, editing — all in one beautifully animated dashboard.
 
 ---
 
-## 📸 Preview
+## Preview
 
 ![TaskMate Screenshot](https://task-mate-kappa-rosy.vercel.app/og-preview.png)
 
 ---
 
-## ✨ Features
+## Features
 
-- ✅ Add, edit, delete tasks effortlessly
-- 🔄 Mark tasks as completed or pending
-- 🔥 Prioritize tasks: High, Medium, Low
-- 🏷️ Tag tasks: Work, Study, Personal, Urgent
-- 📅 Set deadlines and auto-sort by urgency
-- 📦 Drag-and-drop task reordering (DnD Kit + Framer Motion)
-- 🎯 Filter by status (all / completed / pending)
-- 📱 Mobile-first responsive design
-- 💾 Filter state saved in `localStorage`
-- ⚙️ Built using:
+- Add, edit, delete tasks effortlessly
+- Mark tasks as completed or pending
+- Prioritize tasks: High, Medium, Low
+- Tag tasks: Work, Study, Personal, Urgent
+- Set deadlines and auto-sort by urgency
+- Drag-and-drop task reordering (DnD Kit + Framer Motion)
+- Filter by status (all / completed / pending)
+- Mobile-first responsive design
+- Filter state saved in `localStorage`
+- Built using:
   - Frontend: **React + Vite + Tailwind CSS**
   - Backend: **Django + Django REST Framework**
   - Animations: **Framer Motion**
@@ -31,13 +31,13 @@ A sleek, responsive task manager built with **React (Vite + Tailwind CSS)** and 
 
 ---
 
-## 🚀 Live Demo
+## Live Demo
 
 🔗 [https://task-mate-kappa-rosy.vercel.app/]
 
 ---
 
-## 🛠️ Local Setup
+## Local Setup
 
 > Requirements:
 > - Node.js + npm
